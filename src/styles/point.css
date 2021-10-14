@@ -1,0 +1,22 @@
+.container-point {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 7.5px;
+  background-color: #3878a2;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.container-point:active {
+  box-shadow: unset !important;
+}
+
+.container-point .label {
+  position: absolute;
+  font-size: 13px;
+  color: #3878a2;
+  font-family: sans-serif;
+  top: 15px;
+  left: 15px;
+}
