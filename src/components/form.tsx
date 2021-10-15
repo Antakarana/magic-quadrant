@@ -10,7 +10,7 @@ import {
   getPointsFromLocalStorage,
 } from "../service/local-storage";
 
-const Form: React.FC<{ data?: PointsType }> = ({ children, data }) => {
+const Form: React.FC<{ data?: PointsType }> = () => {
   const [label, setLabel] = useState<string>("");
   const [axisX, setAxisX] = useState<number>(0);
   const [axisY, setAxisY] = useState<number>(0);
@@ -22,7 +22,7 @@ const Form: React.FC<{ data?: PointsType }> = ({ children, data }) => {
 
   useEffect(() => {
     dispatch( setPointValues( localPointData ) );
-    setPoints( localPointData );
+    setPoints( [...localPointData] );
   }, []);
 
   const submit = () => {
