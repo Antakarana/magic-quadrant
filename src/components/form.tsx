@@ -5,8 +5,12 @@ import { chartSettings, pointSettings } from "../config";
 import { PointsType, PointType } from "../models";
 import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
 import setPointValues from "../redux/action/point";
+import {
+  addPointsToLocalStorage,
+  getPointsFromLocalStorage,
+} from "../service/local-storage";
 
-const Form: React.FC = () => {
+const Form: React.FC<{ data?: PointsType }> = ({ children, data }) => {
   const [label, setLabel] = useState<string>("");
   const [axisX, setAxisX] = useState<number>(0);
   const [axisY, setAxisY] = useState<number>(0);
@@ -14,6 +18,12 @@ const Form: React.FC = () => {
     useSelector((state: RootStateOrAny) => state?.pointValues?.data) || []
   );
   const dispatch = useDispatch();
+  const localPointData = getPointsFromLocalStorage();
+
+  useEffect(() => {
+    dispatch( setPointValues( localPointData ) );
+    setPoints( localPointData );
+  }, []);
 
   const submit = () => {
     if (!label || !axisX || !axisY) {
@@ -78,6 +88,7 @@ const Form: React.FC = () => {
     points.push(point);
     setPoints([...points]);
     dispatch( setPointValues( points ) );
+    addPointsToLocalStorage(points);
   };
 
   const deletePoint = async (point: PointType) => {
@@ -86,6 +97,7 @@ const Form: React.FC = () => {
     );
     setPoints([...pointValues]);
     dispatch( setPointValues( pointValues ) );
+    addPointsToLocalStorage(pointValues);
   };
 
   return (

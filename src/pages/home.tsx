@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Chart, Form, Point } from "../components";
 import "../styles/home.css";
 import { PointType } from "../models";
@@ -21,7 +21,7 @@ const Home: React.FC = () => {
           />
         ))}
       </Chart>
-      <Form />
+      <Form data={ points}/>
     </div>
   );
 };
