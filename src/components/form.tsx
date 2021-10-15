@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "./index";
 import "../styles/form.css";
 import { chartSettings, pointSettings } from "../config";
@@ -11,9 +11,7 @@ const Form: React.FC = () => {
   const [axisX, setAxisX] = useState<number>(0);
   const [axisY, setAxisY] = useState<number>(0);
   const [points, setPoints] = React.useState<PointsType>(
-    useSelector((state: RootStateOrAny) => state?.pointValues?.data) || [
-      { id: 0, label: "New", x: 50, y: 50 },
-    ]
+    useSelector((state: RootStateOrAny) => state?.pointValues?.data) || []
   );
   const dispatch = useDispatch();
 
@@ -61,50 +59,74 @@ const Form: React.FC = () => {
       return;
     }
     addPoint({
-      id: -1,
       label: label,
       x: axisX,
       y: axisY,
+      id: -1,
     });
   };
 
-  const addPoint = (point: PointType) => {
+  const addPoint = async ( point: PointType ) => {
     const maxId = points.reduce(
       (acc, item) => (acc = acc > item.id ? acc : item.id),
       0
     );
     point.id = maxId + 1;
-
-    setPoints([...points, point]);
-    dispatch(setPointValues(points));
+    setLabel( "" );
+    setAxisX( 0 );
+    setAxisY( 0 );
+    points.push(point);
+    setPoints([...points]);
+    dispatch( setPointValues( points ) );
   };
 
-  const deletePoint = (point: PointType) => {
-    console.log("point delete an ", point);
-
+  const deletePoint = async (point: PointType) => {
     const pointValues = points.filter(
       (item: PointType) => item.id !== point.id
     );
-
-    // if (index > -1) {
-    //   points.splice(index, 1);
-    // }
-    // console.log("--- ", points);
-    console.log("ddf ", pointValues);
-    setPoints(pointValues);
-    dispatch(setPointValues(points));
+    setPoints([...pointValues]);
+    dispatch( setPointValues( pointValues ) );
   };
 
   return (
     <div className="container-form">
-      <button className="btn" onClick={() => submit()}>
-        Add
-      </button>
       <div className="field-label">
         <span>Label</span>
         <span>Vision</span>
         <span>Ability</span>
         <span>Delete</span>
+      </div>
+      <div className="field-input">
+        <Input
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setLabel(event.target.value)
+          }
+          type="text"
+          placeHolder="New"
+          isDisabled={false}
+          value={label}
+        />
+        <Input
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setAxisX(Number(event.target.value))
+          }
+          type="number"
+          placeHolder="50"
+          isDisabled={false}
+          value={axisX}
+        />
+        <Input
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setAxisY(Number(event.target.value))
+          }
+          type="number"
+          placeHolder="50"
+          isDisabled={false}
+          value={axisY}
+        />
+        <button className="btn" onClick={() => submit()}>
+          Add
+        </button>
       </div>
       {points?.map((point: PointType, index: number) => (
         <div className="field-input" key={point.id}>
@@ -114,6 +136,8 @@ const Form: React.FC = () => {
             }
             type="text"
             placeHolder="New"
+            isDisabled={true}
+            value={point.label}
           />
           <Input
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -121,6 +145,8 @@ const Form: React.FC = () => {
             }
             type="number"
             placeHolder="50"
+            isDisabled={true}
+            value={point.x}
           />
           <Input
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -128,8 +154,10 @@ const Form: React.FC = () => {
             }
             type="number"
             placeHolder="50"
+            isDisabled={true}
+            value={point.y}
           />
-          <button onClick={() => deletePoint(point)} className="btn-delete">
+          <button onClick={() => deletePoint(point)} className="btn">
             Delete
           </button>
         </div>

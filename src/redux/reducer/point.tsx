@@ -1,4 +1,5 @@
-const pointValues = (state = {}, action: { type: string; payload: string }) => {
+const pointValues = ( state = {}, action: { type: string; payload: string } ) => {
+
   switch (action.type) {
     case "SET_POINT_VALUES":
       return {

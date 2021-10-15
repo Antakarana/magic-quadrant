@@ -31,26 +31,13 @@
 }
 
 .btn {
-  width: 50px;
-  border: 2px solid #e3e4e7;
-  border-radius: 3px;
-}
-
-.btn:hover {
-  width: 50px;
-  border: 2px solid #e3e4e7;
-  border-radius: 3px;
-  background-color: #696969;
-}
-
-.btn-delete {
   width: 100px;
   height: 22px;
   border: 2px solid #e3e4e7;
   border-radius: 3px;
 }
 
-.btn-delete:hover {
+.btn:hover {
   width: 100px;
   height: 22px;
   border: 2px solid #e3e4e7;
