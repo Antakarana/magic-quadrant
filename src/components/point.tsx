@@ -1,33 +1,22 @@
-import React, { DragEvent, RefObject } from "react";
+import React, { DragEvent } from "react";
 import { chartSettings, pointSettings } from "../config";
 import "../styles/point.css";
-import { PointsType, PointType } from "../models";
-import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
-import setPointValues from "../redux/action/point";
+import { PointType } from "../models";
+import { useDispatch } from "react-redux";
+import { updatePointAction } from "../redux/action/point";
 
 export const Point: React.FC<PointType> = ({ label, x, y, id }) => {
-  const [{ axisX, axisY }, setOffset] = React.useState({ axisX: x, axisY: y });
-  const pointRef: RefObject<HTMLDivElement> = React.useRef(null);
   const dispatch = useDispatch();
-  const [points, setPoints] = React.useState<PointsType>(
-    useSelector((state: RootStateOrAny) => state?.pointValues?.data) || []
-  );
-
-  const updatePoints = (point: PointType) => {
-    points?.map((item: PointType) => {
-      if (item.id === point.id) {
-        item.x = point.x;
-        item.y = point.y;
-      }
-    });
-    dispatch(setPointValues([...points]));
-  };
+  let flag = false;
 
   const onDragEnd = (e: DragEvent) => {
     e.preventDefault();
+
     let newAxisX = e.pageX;
     let newAxisY = e.pageY;
+
     if (newAxisX < 0) newAxisX = 0;
+
     if (
       newAxisX >
       chartSettings.width - pointSettings.width - chartSettings.borderWidth - 1
@@ -37,31 +26,56 @@ export const Point: React.FC<PointType> = ({ label, x, y, id }) => {
         pointSettings.width -
         chartSettings.borderWidth -
         1;
+      flag = true;
     }
+    else flag = false;
     if (newAxisY < 0) newAxisY = 0;
     if (
       newAxisY >
       chartSettings.height -
-        pointSettings.height -
-        chartSettings.borderWidth -
-        1
-    ) {
+      pointSettings.height -
+      chartSettings.borderWidth -
+      1
+    )
+    {
       newAxisY =
         chartSettings.height -
         pointSettings.height -
         chartSettings.borderWidth -
         1;
+      flag = true;
     }
-    setOffset({ axisX: newAxisX, axisY: newAxisY });
-    updatePoints({ id, x: newAxisX, y: newAxisY, label });
+    else flag = false;
+
+    const newPoint = {
+      id: id,
+      x: newAxisX-70,
+      y: newAxisY-15,
+      label: label,
+    };
+
+   !flag && onPointChange(newPoint, "x", Number(e.nativeEvent.pageX));
+   !flag && onPointChange(newPoint, "y", Number(e.nativeEvent.pageY));
+  };
+
+  const onPointChange = (
+    point: PointType,
+    prop: string,
+    value: number | string
+  ) => {
+    const newPoint = {
+      ...point,
+      [prop]: value,
+    };
+
+    dispatch(updatePointAction(newPoint));
   };
 
   return (
     <div
-      ref={pointRef}
       className="container-point"
       style={{
-        transform: `translate3d(${axisX}px, ${axisY}px, 0)`,
+        transform: `translate3d(${x}px, ${y}px, 0)`,
       }}
       draggable
       onDragEnd={onDragEnd}

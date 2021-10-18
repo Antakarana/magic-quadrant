@@ -1,175 +1,123 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Input } from "./index";
 import "../styles/form.css";
 import { chartSettings, pointSettings } from "../config";
 import { PointsType, PointType } from "../models";
 import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
-import setPointValues from "../redux/action/point";
 import {
-  addPointsToLocalStorage,
-  getPointsFromLocalStorage,
-} from "../service/local-storage";
+  addPointAction,
+  deletePointAction,
+  updatePointAction,
+} from "../redux/action/point";
 
 const Form: React.FC<{ data?: PointsType }> = () => {
-  const [label, setLabel] = useState<string>("");
-  const [axisX, setAxisX] = useState<number>(0);
-  const [axisY, setAxisY] = useState<number>(0);
-  const [points, setPoints] = React.useState<PointsType>(
-    useSelector((state: RootStateOrAny) => state?.pointValues?.data) || []
+  const points = useSelector(
+    (state: RootStateOrAny) => state?.pointValues?.data
   );
+  let flag = false;
+
   const dispatch = useDispatch();
-  const localPointData = getPointsFromLocalStorage();
 
-  useEffect(() => {
-    dispatch( setPointValues( localPointData ) );
-    setPoints( [...localPointData] );
-  }, []);
-
-  const submit = () => {
-    if (!label || !axisX || !axisY) {
-      alert("Please fill in the reqired fields");
-      return;
-    }
-    if (
-      axisX < 0 ||
-      axisX >
-        chartSettings.width -
-          pointSettings.width -
-          chartSettings.borderWidth -
-          1
-    ) {
-      alert(
-        `X must be between 0 and ${
+  const onPointAdd = () => {
+    points?.map((item: PointType, index: number) => {
+      if (
+        item.x < 0 ||
+        item.x >
           chartSettings.width -
-          pointSettings.width -
-          chartSettings.borderWidth -
-          1
-        }`
-      );
-      return;
-    }
-
-    if (
-      axisY < 0 ||
-      axisY >
-        chartSettings.height -
-          pointSettings.height -
-          chartSettings.borderWidth -
-          1
-    ) {
-      alert(
-        `Y must be between 0 and ${
+            pointSettings.width -
+            chartSettings.borderWidth -
+            1
+      ) {
+        flag = true;
+        alert(
+          `X must be between 0 and ${
+            chartSettings.width -
+            pointSettings.width -
+            chartSettings.borderWidth -
+            1
+          }`
+        );
+        return;
+      } else if (
+        item.y < 0 ||
+        item.y >
           chartSettings.height -
-          pointSettings.height -
-          chartSettings.borderWidth -
-          1
-        }`
-      );
-
-      return;
-    }
-    addPoint({
-      label: label,
-      x: axisX,
-      y: axisY,
-      id: -1,
+            pointSettings.height -
+            chartSettings.borderWidth -
+            1
+      ) {
+        flag = true;
+        alert(
+          `Y must be between 0 and ${
+            chartSettings.height -
+            pointSettings.height -
+            chartSettings.borderWidth -
+            1
+          }`
+        );
+        return;
+      } else flag = false;
     });
+
+    !flag && dispatch(addPointAction());
   };
 
-  const addPoint = async ( point: PointType ) => {
-    const maxId = points.reduce(
-      (acc, item) => (acc = acc > item.id ? acc : item.id),
-      0
-    );
-    point.id = maxId + 1;
-    setLabel( "" );
-    setAxisX( 0 );
-    setAxisY( 0 );
-    points.push(point);
-    setPoints([...points]);
-    dispatch( setPointValues( points ) );
-    addPointsToLocalStorage(points);
+  const onPointChange = (
+    point: PointType,
+    prop: string,
+    value: number | string
+  ) => {
+    const newPoint = {
+      ...point,
+      [prop]: value,
+    };
+
+    dispatch(updatePointAction(newPoint));
   };
 
-  const deletePoint = async (point: PointType) => {
-    const pointValues = points.filter(
-      (item: PointType) => item.id !== point.id
-    );
-    setPoints([...pointValues]);
-    dispatch( setPointValues( pointValues ) );
-    addPointsToLocalStorage(pointValues);
+  const onPointDelete = (pointId: number) => {
+    dispatch(deletePointAction(pointId));
   };
 
   return (
     <div className="container-form">
+      <button className="btn" onClick={onPointAdd}>
+        Add
+      </button>
       <div className="field-label">
         <span>Label</span>
         <span>Vision</span>
         <span>Ability</span>
         <span>Delete</span>
       </div>
-      <div className="field-input">
-        <Input
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setLabel(event.target.value)
-          }
-          type="text"
-          placeHolder="New"
-          isDisabled={false}
-          value={label}
-        />
-        <Input
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setAxisX(Number(event.target.value))
-          }
-          type="number"
-          placeHolder="50"
-          isDisabled={false}
-          value={axisX}
-        />
-        <Input
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setAxisY(Number(event.target.value))
-          }
-          type="number"
-          placeHolder="50"
-          isDisabled={false}
-          value={axisY}
-        />
-        <button className="btn" onClick={() => submit()}>
-          Add
-        </button>
-      </div>
+
       {points?.map((point: PointType, index: number) => (
         <div className="field-input" key={point.id}>
           <Input
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setLabel(event.target.value)
+              onPointChange(point, "label", event.target.value)
             }
             type="text"
             placeHolder="New"
-            isDisabled={true}
             value={point.label}
           />
           <Input
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setAxisX(Number(event.target.value))
+              onPointChange(point, "x", Number(event.target.value))
             }
             type="number"
             placeHolder="50"
-            isDisabled={true}
             value={point.x}
           />
           <Input
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setAxisY(Number(event.target.value))
+              onPointChange(point, "y", event.target.value)
             }
             type="number"
             placeHolder="50"
-            isDisabled={true}
             value={point.y}
           />
-          <button onClick={() => deletePoint(point)} className="btn">
+          <button onClick={() => onPointDelete(point.id)} className="btn">
             Delete
           </button>
         </div>

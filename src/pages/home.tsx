@@ -1,12 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Chart, Form, Point } from "../components";
 import "../styles/home.css";
 import { PointType } from "../models";
 import { RootStateOrAny, useSelector } from "react-redux";
 
 const Home: React.FC = () => {
-  let points =
-    useSelector((state: RootStateOrAny) => state?.pointValues?.data) || [];
+  let points = useSelector((state: RootStateOrAny) => state?.pointValues.data);
 
   return (
     <div className="container-home">
@@ -21,7 +20,7 @@ const Home: React.FC = () => {
           />
         ))}
       </Chart>
-      <Form data={ points}/>
+      <Form data={points} />
     </div>
   );
 };
